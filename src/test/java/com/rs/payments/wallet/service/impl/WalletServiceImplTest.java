@@ -68,4 +68,28 @@ class WalletServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> walletService.createWalletForUser(userId));
         verify(userRepository, never()).save(any());
     }
+    @Test
+    @DisplayName("Should deposit amount to wallet")
+    void shouldDepositAmountToWallet() {
+        // Given
+        UUID walletId = UUID.randomUUID();
+
+        Wallet wallet = new Wallet();
+        wallet.setId(walletId);
+        wallet.setBalance(BigDecimal.valueOf(100));
+
+        when(walletRepository.findById(walletId))
+                .thenReturn(Optional.of(wallet));
+
+        when(walletRepository.save(wallet)).thenReturn(wallet);
+
+        // When
+        walletService.deposit(walletId, BigDecimal.valueOf(50));
+
+        // Then
+        assertEquals(BigDecimal.valueOf(150), wallet.getBalance());
+
+        verify(walletRepository, times(1)).findById(walletId);
+        verify(walletRepository, times(1)).save(wallet);
+    }
 }
