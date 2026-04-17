@@ -35,4 +35,22 @@ public class WalletServiceImpl implements WalletService {
         user = userRepository.save(user); // Cascade saves wallet
         return user.getWallet();
     }
+    @Override
+    public void deposit(UUID walletId, BigDecimal amount) {
+
+        // 1. Validate amount
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than zero");
+        }
+
+        // 2. Fetch wallet
+        Wallet wallet = walletRepository.findById(walletId)
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
+
+        // 3. Update balance
+        wallet.setBalance(wallet.getBalance().add(amount));
+
+        // 4. Save wallet
+        walletRepository.save(wallet);
+    }
 }

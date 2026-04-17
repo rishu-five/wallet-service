@@ -92,4 +92,5 @@ class WalletServiceImplTest {
         verify(walletRepository, times(1)).findById(walletId);
         verify(walletRepository, times(1)).save(wallet);
     }
+
 }
