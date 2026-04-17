@@ -138,4 +138,54 @@ class WalletServiceImplTest {
         verify(walletRepository, never()).save(any());
     }
 
+    @Test
+    @DisplayName("Should transfer amount between wallets")
+    void shouldTransferAmountBetweenWallets() {
+
+        UUID fromWalletId = UUID.randomUUID();
+        UUID toWalletId = UUID.randomUUID();
+
+        Wallet fromWallet = new Wallet();
+        fromWallet.setId(fromWalletId);
+        fromWallet.setBalance(BigDecimal.valueOf(200));
+
+        Wallet toWallet = new Wallet();
+        toWallet.setId(toWalletId);
+        toWallet.setBalance(BigDecimal.valueOf(100));
+
+        when(walletRepository.findById(fromWalletId))
+                .thenReturn(Optional.of(fromWallet));
+
+        when(walletRepository.findById(toWalletId))
+                .thenReturn(Optional.of(toWallet));
+
+        walletService.transfer(fromWalletId, toWalletId, BigDecimal.valueOf(50));
+
+        assertEquals(BigDecimal.valueOf(150), fromWallet.getBalance());
+        assertEquals(BigDecimal.valueOf(150), toWallet.getBalance());
+
+        verify(walletRepository, times(2)).save(any(Wallet.class));
+        verify(transactionRepository, times(2)).save(any(Transaction.class));
+    }
+
+    @Test
+    @DisplayName("Should fail transfer when insufficient balance")
+    void shouldFailTransferWhenInsufficientBalance() {
+
+        UUID fromWalletId = UUID.randomUUID();
+        UUID toWalletId = UUID.randomUUID();
+
+        Wallet fromWallet = new Wallet();
+        fromWallet.setId(fromWalletId);
+        fromWallet.setBalance(BigDecimal.valueOf(30));
+
+        when(walletRepository.findById(fromWalletId))
+                .thenReturn(Optional.of(fromWallet));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> walletService.transfer(fromWalletId, toWalletId, BigDecimal.valueOf(50)));
+
+        verify(walletRepository, never()).save(any());
+    }
+
 }
