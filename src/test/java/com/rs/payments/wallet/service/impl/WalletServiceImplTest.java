@@ -167,7 +167,7 @@ class WalletServiceImplTest {
         verify(walletRepository, times(2)).save(any(Wallet.class));
         verify(transactionRepository, times(2)).save(any(Transaction.class));
     }
-    
+
     @Test
     @DisplayName("Should fail transfer when insufficient balance")
     void shouldFailTransferWhenInsufficientBalance() {

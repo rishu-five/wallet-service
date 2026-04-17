@@ -1,5 +1,6 @@
 package com.rs.payments.wallet.service.impl;
 
+import com.rs.payments.wallet.dto.TransferResponse;
 import com.rs.payments.wallet.exception.ResourceNotFoundException;
 import com.rs.payments.wallet.model.Transaction;
 import com.rs.payments.wallet.model.TransactionType;
@@ -110,7 +111,7 @@ public class WalletServiceImpl implements WalletService {
     }
 
     @Override
-    public void transfer(UUID fromWalletId, UUID toWalletId, BigDecimal amount) {
+    public TransferResponse transfer(UUID fromWalletId, UUID toWalletId, BigDecimal amount) {
 
         // 1. Validate amount
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -159,5 +160,6 @@ public class WalletServiceImpl implements WalletService {
         // 10. Save both transactions
         transactionRepository.save(debitTransaction);
         transactionRepository.save(creditTransaction);
+        return new TransferResponse(fromWallet, toWallet, "Transfer successful");
     }
 }
