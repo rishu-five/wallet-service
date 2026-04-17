@@ -10,10 +10,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/wallets")
@@ -45,5 +45,25 @@ public class WalletController {
     public ResponseEntity<Wallet> createWallet(@Valid @RequestBody CreateWalletRequest request) {
         Wallet wallet = walletService.createWalletForUser(request.getUserId());
         return ResponseEntity.ok(wallet);
+    }
+    // API to deposit money into a wallet
+    @Operation(
+            summary = "Deposit amount to wallet", // Short description for Swagger UI
+            description = "This API adds a given amount to the wallet balance", // Detailed explanation
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Amount deposited successfully"), // Success case
+                    @ApiResponse(responseCode = "404", description = "Wallet not found") // If wallet doesn't exist
+            }
+    )
+    @PostMapping("/{walletId}/deposit") // Endpoint: /wallets/{walletId}/deposit
+    public ResponseEntity<String> deposit(
+            @PathVariable UUID walletId, // Wallet ID coming from URL
+            @RequestParam BigDecimal amount) { // Amount coming as query parameter
+
+        // Call service layer to perform deposit logic
+        walletService.deposit(walletId, amount);
+
+        // Return success response to user
+        return ResponseEntity.ok("Amount deposited successfully");
     }
 }
