@@ -90,4 +90,20 @@ public class WalletController {
 
         return ResponseEntity.ok(updatedWallet);
     }
+
+    @Operation(
+            summary = "Get wallet balance",
+            description = "Returns the current balance of the wallet",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Balance fetched successfully"),
+                    @ApiResponse(responseCode = "404", description = "Wallet not found")
+            }
+    )
+    @GetMapping("/{walletId}/balance")
+    public ResponseEntity<BigDecimal> getBalance(@PathVariable UUID walletId) {
+
+        BigDecimal balance = walletService.getBalance(walletId);
+
+        return ResponseEntity.ok(balance);
+    }
 }

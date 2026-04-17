@@ -162,4 +162,12 @@ public class WalletServiceImpl implements WalletService {
         transactionRepository.save(creditTransaction);
         return new TransferResponse(fromWallet, toWallet, "Transfer successful");
     }
+
+    @Override
+    public BigDecimal getBalance(UUID walletId) {
+        Wallet wallet = walletRepository.findById(walletId)
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
+
+        return wallet.getBalance();
+    }
 }
