@@ -9,4 +9,5 @@ public interface WalletService {
     void deposit(UUID walletId, BigDecimal amount);
     void withdraw(UUID walletId, BigDecimal amount);
     Wallet getWalletById(UUID walletId);
+    void transfer(UUID fromWalletId, UUID toWalletId, BigDecimal amount);
 }

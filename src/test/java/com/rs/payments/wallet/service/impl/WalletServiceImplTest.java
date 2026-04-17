@@ -167,7 +167,7 @@ class WalletServiceImplTest {
         verify(walletRepository, times(2)).save(any(Wallet.class));
         verify(transactionRepository, times(2)).save(any(Transaction.class));
     }
-
+    
     @Test
     @DisplayName("Should fail transfer when insufficient balance")
     void shouldFailTransferWhenInsufficientBalance() {
@@ -179,8 +179,15 @@ class WalletServiceImplTest {
         fromWallet.setId(fromWalletId);
         fromWallet.setBalance(BigDecimal.valueOf(30));
 
+        Wallet toWallet = new Wallet();
+        toWallet.setId(toWalletId);
+
         when(walletRepository.findById(fromWalletId))
                 .thenReturn(Optional.of(fromWallet));
+
+        // 🔥 THIS WAS MISSING
+        when(walletRepository.findById(toWalletId))
+                .thenReturn(Optional.of(toWallet));
 
         assertThrows(IllegalArgumentException.class,
                 () -> walletService.transfer(fromWalletId, toWalletId, BigDecimal.valueOf(50)));

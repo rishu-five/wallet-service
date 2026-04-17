@@ -108,4 +108,56 @@ public class WalletServiceImpl implements WalletService {
         return walletRepository.findById(walletId)
                 .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
     }
+
+    @Override
+    public void transfer(UUID fromWalletId, UUID toWalletId, BigDecimal amount) {
+
+        // 1. Validate amount
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than zero");
+        }
+
+        // 2. Prevent same wallet transfer
+        if (fromWalletId.equals(toWalletId)) {
+            throw new IllegalArgumentException("Cannot transfer to same wallet");
+        }
+
+        // 3. Fetch wallets
+        Wallet fromWallet = walletRepository.findById(fromWalletId)
+                .orElseThrow(() -> new ResourceNotFoundException("Source wallet not found"));
+
+        Wallet toWallet = walletRepository.findById(toWalletId)
+                .orElseThrow(() -> new ResourceNotFoundException("Destination wallet not found"));
+
+        // 4. Check sufficient balance
+        if (fromWallet.getBalance().compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient balance");
+        }
+
+        // 5. Deduct from source
+        fromWallet.setBalance(fromWallet.getBalance().subtract(amount));
+
+        // 6. Add to destination
+        toWallet.setBalance(toWallet.getBalance().add(amount));
+
+        // 7. Save both wallets
+        walletRepository.save(fromWallet);
+        walletRepository.save(toWallet);
+
+        // 8. Create OUT transaction
+        Transaction debitTransaction = new Transaction();
+        debitTransaction.setWallet(fromWallet);
+        debitTransaction.setAmount(amount);
+        debitTransaction.setType(TransactionType.TRANSFER_OUT);
+
+        // 9. Create IN transaction
+        Transaction creditTransaction = new Transaction();
+        creditTransaction.setWallet(toWallet);
+        creditTransaction.setAmount(amount);
+        creditTransaction.setType(TransactionType.TRANSFER_IN);
+
+        // 10. Save both transactions
+        transactionRepository.save(debitTransaction);
+        transactionRepository.save(creditTransaction);
+    }
 }
