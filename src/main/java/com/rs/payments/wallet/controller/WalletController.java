@@ -55,15 +55,39 @@ public class WalletController {
                     @ApiResponse(responseCode = "404", description = "Wallet not found") // If wallet doesn't exist
             }
     )
-    @PostMapping("/{walletId}/deposit") // Endpoint: /wallets/{walletId}/deposit
-    public ResponseEntity<String> deposit(
-            @PathVariable UUID walletId, // Wallet ID coming from URL
-            @RequestParam BigDecimal amount) { // Amount coming as query parameter
+    @PostMapping("/{walletId}/deposit")
+    public ResponseEntity<Wallet> deposit(
+            @PathVariable UUID walletId,
+            @RequestParam BigDecimal amount) {
 
-        // Call service layer to perform deposit logic
+        // Perform deposit
         walletService.deposit(walletId, amount);
 
-        // Return success response to user
-        return ResponseEntity.ok("Amount deposited successfully");
+        // Fetch updated wallet
+        Wallet updatedWallet = walletService.getWalletById(walletId);
+
+        // Return updated wallet
+        return ResponseEntity.ok(updatedWallet);
+    }
+
+    @Operation(
+            summary = "Withdraw amount from wallet",
+            description = "Deducts specified amount from the wallet balance if sufficient funds are available",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Amount withdrawn successfully"),
+                    @ApiResponse(responseCode = "400", description = "Invalid amount or insufficient balance"),
+                    @ApiResponse(responseCode = "404", description = "Wallet not found")
+            }
+    )
+    @PostMapping("/{walletId}/withdraw")
+    public ResponseEntity<Wallet> withdraw(
+            @PathVariable UUID walletId,
+            @RequestParam BigDecimal amount) {
+
+        walletService.withdraw(walletId, amount);
+
+        Wallet updatedWallet = walletService.getWalletById(walletId); // add this method
+
+        return ResponseEntity.ok(updatedWallet);
     }
 }

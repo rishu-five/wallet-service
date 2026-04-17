@@ -11,10 +11,12 @@ import com.rs.payments.wallet.repository.WalletRepository;
 import com.rs.payments.wallet.service.WalletService;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 
 @Service
+@Transactional
 public class WalletServiceImpl implements WalletService {
 
     private final UserRepository userRepository;
@@ -99,5 +101,11 @@ public class WalletServiceImpl implements WalletService {
         transaction.setType(TransactionType.WITHDRAWAL);
 
         transactionRepository.save(transaction);
+    }
+
+    @Override
+    public Wallet getWalletById(UUID walletId) {
+        return walletRepository.findById(walletId)
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
     }
 }
