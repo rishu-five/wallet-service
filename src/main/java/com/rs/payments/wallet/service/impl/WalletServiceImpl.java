@@ -70,4 +70,34 @@ public class WalletServiceImpl implements WalletService {
         transactionRepository.save(transaction);
 
     }
+
+    @Override
+    public void withdraw(UUID walletId, BigDecimal amount) {
+
+        // 1. Validate amount
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be greater than zero");
+        }
+
+        // 2. Fetch wallet
+        Wallet wallet = walletRepository.findById(walletId)
+                .orElseThrow(() -> new ResourceNotFoundException("Wallet not found"));
+
+        // 3. Check sufficient balance
+        if (wallet.getBalance().compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient balance");
+        }
+
+        // 4. Deduct amount
+        wallet.setBalance(wallet.getBalance().subtract(amount));
+        walletRepository.save(wallet);
+
+        // 5. Create transaction
+        Transaction transaction = new Transaction();
+        transaction.setWallet(wallet);
+        transaction.setAmount(amount);
+        transaction.setType(TransactionType.WITHDRAWAL);
+
+        transactionRepository.save(transaction);
+    }
 }

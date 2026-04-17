@@ -7,4 +7,5 @@ import com.rs.payments.wallet.model.Wallet;
 public interface WalletService {
     Wallet createWalletForUser(UUID userId);
     void deposit(UUID walletId, BigDecimal amount);
+    void withdraw(UUID walletId, BigDecimal amount);
 }
