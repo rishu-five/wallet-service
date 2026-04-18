@@ -34,6 +34,9 @@ public class WalletServiceImpl implements WalletService {
     public Wallet createWalletForUser(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        if (user.getWallet() != null) {
+            throw new IllegalArgumentException("User already has wallet");
+        }
 
         Wallet wallet = new Wallet();
         wallet.setBalance(BigDecimal.ZERO);
@@ -44,7 +47,7 @@ public class WalletServiceImpl implements WalletService {
         return user.getWallet();
     }
     @Override
-    public void deposit(UUID walletId, BigDecimal amount) {
+    public Wallet deposit(UUID walletId, BigDecimal amount) {
 
         // 1. Validate amount
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -72,10 +75,11 @@ public class WalletServiceImpl implements WalletService {
         // Save transaction in database to persist record for history/audit
         transactionRepository.save(transaction);
 
+        return wallet;
     }
 
     @Override
-    public void withdraw(UUID walletId, BigDecimal amount) {
+    public Wallet withdraw(UUID walletId, BigDecimal amount) {
 
         // 1. Validate amount
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
@@ -102,6 +106,7 @@ public class WalletServiceImpl implements WalletService {
         transaction.setType(TransactionType.WITHDRAWAL);
 
         transactionRepository.save(transaction);
+        return wallet;
     }
 
     @Override

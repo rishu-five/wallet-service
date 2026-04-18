@@ -44,7 +44,7 @@ public class WalletController {
     @PostMapping
     public ResponseEntity<Wallet> createWallet(@Valid @RequestBody CreateWalletRequest request) {
         Wallet wallet = walletService.createWalletForUser(request.getUserId());
-        return ResponseEntity.ok(wallet);
+        return ResponseEntity.status(201).body(wallet);
     }
     // API to deposit money into a wallet
     @Operation(
@@ -60,11 +60,8 @@ public class WalletController {
             @PathVariable UUID walletId,
             @RequestParam BigDecimal amount) {
 
-        // Perform deposit
-        walletService.deposit(walletId, amount);
-
         // Fetch updated wallet
-        Wallet updatedWallet = walletService.getWalletById(walletId);
+        Wallet updatedWallet = walletService.deposit(walletId, amount);
 
         // Return updated wallet
         return ResponseEntity.ok(updatedWallet);
@@ -83,11 +80,7 @@ public class WalletController {
     public ResponseEntity<Wallet> withdraw(
             @PathVariable UUID walletId,
             @RequestParam BigDecimal amount) {
-
-        walletService.withdraw(walletId, amount);
-
-        Wallet updatedWallet = walletService.getWalletById(walletId); // add this method
-
+        Wallet updatedWallet = walletService.withdraw(walletId, amount);
         return ResponseEntity.ok(updatedWallet);
     }
 
